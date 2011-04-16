@@ -4,9 +4,9 @@ import net.htmlparser.jericho._
 import org.jaxen.jericho._
 import scala.collection.JavaConversions._
 
-class HtmlScraper(doc: Source) {
+class HtmlScraper(segment: Segment) {
   def eval(xpath: String): List[AnyRef] = {
-    new JerichoXPath(xpath).evaluate(doc) match {
+    new JerichoXPath(xpath).evaluate(segment) match {
       case list: java.util.List[AnyRef] =>
         list.toList
       case elem =>
@@ -16,15 +16,15 @@ class HtmlScraper(doc: Source) {
 }
 
 object HtmlScraper {
-  def apply(url: String, args: Any*): HtmlScraper = {
-    val navigator = DocumentNavigator.getInstance
-    val doc = navigator.getDocument(url.format(args: _*))
-    new HtmlScraper(doc.asInstanceOf[Source])
+  def apply(url: String, args: Any*): Segment = {
+    DocumentNavigator.getInstance.getDocument(url.format(args: _*)).asInstanceOf[Source]
   }
 
-  def parse(text: CharSequence): HtmlScraper = {
+  def parse(text: CharSequence): Segment = {
     val doc = new Source(text)
     doc.fullSequentialParse
-    new HtmlScraper(doc)
+    doc
   }
+
+  implicit def segmentWrapper(segment: Segment) = new HtmlScraper(segment)
 }
